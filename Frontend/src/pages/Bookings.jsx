@@ -31,7 +31,7 @@ const Bookings = () => {
   const filteredBookings = bookings.filter(b => {
       const date = new Date(b.date);
       const now = new Date();
-      // Simple upcoming logic
+
       const isPast = date < now && format(date, 'yyyy-MM-dd') !== format(now, 'yyyy-MM-dd');
       return filter === 'upcoming' ? !isPast : isPast;
   });
@@ -154,7 +154,6 @@ const Bookings = () => {
         </div>
       )}
 
-      {/* Details Modal */}
       {selectedBooking && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
           <div className="bg-white rounded-2xl max-w-lg w-full overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200">

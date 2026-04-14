@@ -15,7 +15,7 @@ function App() {
     <Router>
       <ToastContainer position="bottom-right" autoClose={3000} hideProgressBar={false} />
       <Routes>
-        {/* Admin Dashboard Routes */}
+
         <Route path="/" element={<Layout />}>
           <Route index element={<Dashboard />} />
           <Route path="availability" element={<Availability />} />
@@ -23,7 +23,6 @@ function App() {
           <Route path="bookings" element={<Bookings />} />
         </Route>
 
-        {/* Public Pages */}
         <Route path="/:username/:slug" element={<BookingPage />} />
         <Route path="/reschedule/:id" element={<ReschedulePage />} />
       </Routes>

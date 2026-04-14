@@ -41,7 +41,7 @@ const BookingPage = () => {
   }, [selectedDate, eventType]);
 
   const fetchSlots = async () => {
-    // Abort previous request
+
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
     }
@@ -173,8 +173,7 @@ const BookingPage = () => {
   return (
     <div className="min-h-screen bg-gray-50/50 flex items-center justify-center p-4 selection:bg-black selection:text-white">
       <div className="max-w-5xl w-full flex flex-col md:flex-row bg-white border border-gray-100 rounded-[2.5rem] overflow-hidden shadow-2xl shadow-gray-200/50 animate-in fade-in slide-in-from-bottom-4 duration-700">
-        
-        {/* Left Sidebar: Event Meta */}
+
         <div className="md:w-[35%] p-10 border-r border-gray-50 bg-[#fafafa]">
           <div className="flex items-center gap-3 mb-10">
             <div className="w-8 h-8 bg-black rounded-lg flex items-center justify-center text-white font-black text-xs">C</div>
@@ -206,7 +205,6 @@ const BookingPage = () => {
           </div>
         </div>
 
-        {/* Right Content: Calendar & Details */}
         <div className="flex-1 p-10 lg:p-14 overflow-hidden">
           {bookingStep === 'calendar' ? (
             <div className="flex flex-col lg:flex-row gap-12 h-full">
@@ -278,7 +276,6 @@ const BookingPage = () => {
                         />
                     </div>
 
-                    {/* DYNAMIC CUSTOM QUESTIONS */}
                     {eventType.questions?.map((q, idx) => (
                         <div key={idx}>
                             <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 ml-1">{q.label} {q.required && '*'}</label>

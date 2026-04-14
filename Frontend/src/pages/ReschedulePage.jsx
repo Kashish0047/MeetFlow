@@ -143,8 +143,7 @@ const ReschedulePage = () => {
     return (
         <div className="min-h-screen bg-gray-50/50 flex items-center justify-center p-4">
             <div className="max-w-5xl w-full flex flex-col md:flex-row bg-white border border-gray-100 rounded-[2.5rem] overflow-hidden shadow-2xl shadow-gray-200/50">
-                
-                {/* Left Sidebar */}
+
                 <div className="md:w-[35%] p-10 border-r border-gray-50 bg-[#fafafa]">
                     <div className="flex items-center gap-2 mb-10">
                         <div className="p-2 bg-blue-50 rounded-lg text-blue-600">
@@ -176,7 +175,6 @@ const ReschedulePage = () => {
                     </div>
                 </div>
 
-                {/* Right Content */}
                 <div className="flex-1 p-10 lg:p-14">
                     <div className="flex flex-col lg:flex-row gap-12 h-full">
                         <div className="flex-1">

@@ -2,7 +2,7 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
 async function main() {
-  // 1. Create default user (MeetFlow Branding)
+ 
   const user = await prisma.user.upsert({
     where: { email: 'hello@meetflow.com' },
     update: {},
@@ -15,7 +15,7 @@ async function main() {
 
   console.log('User created:', user.username);
 
-  // 2. Create a default schedule with Timezone
+ 
   const schedule = await prisma.schedule.upsert({
     where: { id: 1 },
     update: {
@@ -41,7 +41,7 @@ async function main() {
 
   console.log('Default schedule created with timezone Asia/Kolkata');
 
-  // 3. Create default event types with MeetFlow branding
+  
   const eventTypes = [
     {
       title: '15 Min Discovery Call',

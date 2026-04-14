@@ -36,7 +36,7 @@ const Availability = () => {
         try {
             const res = await axios.get(`${API_BASE}/availability`);
             setScheduleId(res.data.id);
-            // Ensure all 7 days are represented
+
             const fullSchedule = Array.from({ length: 7 }, (_, i) => {
                 const existing = res.data.availability.find(d => d.dayOfWeek === i);
                 if (existing) {
@@ -213,7 +213,6 @@ const Availability = () => {
                 </div>
             </div>
 
-            {/* Date Overrides Section */}
             <div className="space-y-6">
                 <div className="flex items-center justify-between">
                     <div>
@@ -282,7 +281,6 @@ const Availability = () => {
                 </div>
             </div>
 
-            {/* Override Modal */}
             {showOverrideModal && (
                 <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center p-4 z-50 animate-in fade-in duration-300">
                     <div className="bg-white rounded-[2.5rem] max-w-sm w-full p-10 shadow-2xl animate-in zoom-in-95 duration-300">

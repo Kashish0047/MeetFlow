@@ -12,10 +12,8 @@ const PORT = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
-// Mock User ID 1 for all requests as per instructions
 const DEFAULT_USER_ID = 1;
 
-// --- Email Config ---
 const transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST,
     port: process.env.SMTP_PORT,
@@ -25,7 +23,6 @@ const transporter = nodemailer.createTransport({
     },
 });
 
-// Verify SMTP connection
 transporter.verify((error, success) => {
     if (error) {
         console.warn("❌ SMTP Connection Error: Check your SendGrid API Key and Sender Email.");
@@ -48,9 +45,6 @@ const sendEmail = async (to, subject, html) => {
     }
 };
 
-// --- Routes ---
-
-// 1. Create a new meeting type (Enhanced)
 app.post('/event-types', async (req, res) => {
   const { title, description, slug, duration, bufferTime, scheduleId, questions } = req.body;
   try {
@@ -72,7 +66,6 @@ app.post('/event-types', async (req, res) => {
   }
 });
 
-// 2. Fetch all event types (Enhanced)
 app.get('/event-types', async (req, res) => {
   const eventTypes = await prisma.eventType.findMany({
     where: { userId: DEFAULT_USER_ID },
@@ -81,7 +74,6 @@ app.get('/event-types', async (req, res) => {
   res.json(eventTypes);
 });
 
-// 3. Get single event type by slug (Enhanced)
 app.get('/event-types/:slug', async (req, res) => {
   const { slug } = req.params;
   const eventType = await prisma.eventType.findUnique({
@@ -92,14 +84,12 @@ app.get('/event-types/:slug', async (req, res) => {
   res.json(eventType);
 });
 
-// 4. Fetch Default Schedule (for global Availability page)
 app.get('/availability', async (req, res) => {
     let schedule = await prisma.schedule.findFirst({
         where: { userId: DEFAULT_USER_ID, isDefault: true },
         include: { availability: true }
     });
-    
-    // If no default exists, create one
+
     if (!schedule) {
         schedule = await prisma.schedule.create({
             data: {
@@ -150,7 +140,6 @@ app.post('/availability', async (req, res) => {
     }
 });
 
-// 5. Fetch All Schedules
 app.get('/schedules', async (req, res) => {
     try {
         const schedules = await prisma.schedule.findMany({
@@ -163,13 +152,12 @@ app.get('/schedules', async (req, res) => {
     }
 });
 
-// 5. Update/Set Schedule Availability
 app.post('/schedules', async (req, res) => {
     const { name, availability, id, timezone } = req.body; 
     try {
         if (id) {
             const scheduleId = parseInt(id);
-            // Update existing
+
             await prisma.availability.deleteMany({ where: { scheduleId } });
             const updated = await prisma.schedule.update({
                 where: { id: scheduleId },
@@ -187,7 +175,7 @@ app.post('/schedules', async (req, res) => {
             });
             return res.json(updated);
         } else {
-            // Create new
+
             const created = await prisma.schedule.create({
                 data: {
                     name,
@@ -219,7 +207,6 @@ app.delete('/schedules/:id', async (req, res) => {
     }
 });
 
-// 6. Date Overrides
 app.get('/overrides', async (req, res) => {
     const { scheduleId } = req.query;
     const overrides = await prisma.dateOverride.findMany({
@@ -275,7 +262,6 @@ app.delete('/overrides/:id', async (req, res) => {
     }
 });
 
-// 7. Core Route: Get Available Slots (Highly Enhanced)
 app.get('/slots', async (req, res) => {
   const { eventTypeId, date } = req.query; // date format: YYYY-MM-DD
   if (!eventTypeId || !date) return res.status(400).json({ error: 'Missing params' });
@@ -291,7 +277,6 @@ app.get('/slots', async (req, res) => {
   const isToday = isSameDay(targetDate, now);
   const dayOfWeek = targetDate.getDay();
 
-  // 1. Check for Date Overrides (Specific to this event's schedule)
   const scheduleId = evType.scheduleId || (await prisma.schedule.findFirst({ where: { userId: DEFAULT_USER_ID, isDefault: true } })).id;
 
   const override = await prisma.dateOverride.findFirst({
@@ -310,7 +295,7 @@ app.get('/slots', async (req, res) => {
           return res.json([]); // Blocked day
       }
   } else {
-      // 2. Use Weekly Schedule
+
       const schedule = evType.schedule || await prisma.schedule.findFirst({ where: { userId: DEFAULT_USER_ID, isDefault: true }, include: { availability: true } });
       if (!schedule) return res.json([]);
       activeAvailability = schedule.availability.find(a => a.dayOfWeek === dayOfWeek);
@@ -318,7 +303,6 @@ app.get('/slots', async (req, res) => {
 
   if (!activeAvailability) return res.json([]);
 
-  // 3. Subtract existing bookings
   const bookings = await prisma.booking.findMany({
     where: {
       date: { gte: startOfDay(targetDate), lte: endOfDay(targetDate) },
@@ -340,22 +324,17 @@ app.get('/slots', async (req, res) => {
 
     if (isAfter(slotEndPos, endPos)) break;
 
-    // Filter out past times if the date is Today
     if (isToday && isBefore(currentPos, now)) {
         currentPos = addMinutes(slotEndPos, buffer);
         continue;
     }
 
-    // Overlap Check (Accounting for Buffer)
     const overlap = bookings.some(b => {
         const bStart = parse(b.startTime, 'HH:mm', targetDate);
         const bEnd = parse(b.endTime, 'HH:mm', targetDate);
         const sStart = currentPos;
         const sEnd = slotEndPos;
-        
-        // A slot is unavailable if it starts before a booking ends + buffer
-        // Or ends after a booking starts - buffer
-        // For simplicity: check if [sStart, sEnd + buffer] overlaps [bStart - buffer, bEnd + buffer]
+
         const paddedSStart = addMinutes(sStart, -buffer);
         const paddedSEnd = addMinutes(sEnd, buffer);
         
@@ -366,14 +345,12 @@ app.get('/slots', async (req, res) => {
       slots.push({ start: slotStart, end: slotEnd });
     }
 
-    // Next slot starts after duration + buffer
     currentPos = addMinutes(slotEndPos, buffer);
   }
 
   res.json(slots);
 });
 
-// 8. Booking (Enhanced with Custom Questions and Email Simulation)
 app.post('/book', async (req, res) => {
   const { eventTypeId, name, email, date, startTime, endTime, answers } = req.body;
   
@@ -392,7 +369,6 @@ app.post('/book', async (req, res) => {
       include: { eventType: true }
     });
 
-    // 📧 REAL EMAIL NOTIFICATION
     const emailHtml = `
         <div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 40px; border: 1px solid #eee; border-radius: 20px;">
             <h2 style="font-size: 24px; font-weight: 900; color: #000; margin-bottom: 20px;">Meeting Confirmed</h2>
@@ -424,7 +400,6 @@ app.post('/book', async (req, res) => {
   }
 });
 
-// 9. Fetch Bookings (Enhanced)
 app.get('/bookings', async (req, res) => {
     const bookings = await prisma.booking.findMany({
         include: { eventType: true },
@@ -433,7 +408,6 @@ app.get('/bookings', async (req, res) => {
     res.json(bookings);
 });
 
-// 10. Reschedule Booking
 app.post('/bookings/:id/reschedule', async (req, res) => {
     const { date, startTime, endTime } = req.body;
     try {
@@ -446,8 +420,7 @@ app.post('/bookings/:id/reschedule', async (req, res) => {
                 notes: 'Rescheduled'
             }
         });
-        
-        // 📧 REAL RESCHEDULE EMAIL
+
         const rescheduleHtml = `
             <div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 40px; border: 1px solid #eee; border-radius: 20px;">
                 <h2 style="font-size: 24px; font-weight: 900; color: #000; margin-bottom: 20px;">Meeting Rescheduled</h2>
@@ -469,7 +442,6 @@ app.post('/bookings/:id/reschedule', async (req, res) => {
     }
 });
 
-// 11. Delete/Update Event Type (Simplified CRUD)
 app.delete('/event-types/:id', async (req, res) => {
     await prisma.eventType.delete({ where: { id: parseInt(req.params.id) } });
     res.json({ message: 'Deleted' });
