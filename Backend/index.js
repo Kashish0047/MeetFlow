@@ -152,11 +152,15 @@ app.post('/availability', async (req, res) => {
 
 // 5. Fetch All Schedules
 app.get('/schedules', async (req, res) => {
-    const schedules = await prisma.schedule.findMany({
-        where: { userId: DEFAULT_USER_ID },
-        include: { availability: true }
-    });
-    res.json(schedules);
+    try {
+        const schedules = await prisma.schedule.findMany({
+            where: { userId: DEFAULT_USER_ID },
+            include: { availability: true }
+        });
+        res.json(schedules);
+    } catch (error) {
+        res.status(500).json({ error: error.message, name: error.name, code: error.code });
+    }
 });
 
 // 5. Update/Set Schedule Availability
