@@ -1,0 +1,79 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            Int            @id @default(autoincrement())
+  username      String         @unique
+  name          String?
+  email         String         @unique
+  dateOverrides DateOverride[]
+  eventTypes    EventType[]
+  schedules     Schedule[]
+}
+
+model Schedule {
+  id            Int            @id @default(autoincrement())
+  name          String         @default("Default Schedule")
+  isDefault     Boolean        @default(false)
+  timezone      String         @default("Asia/Kolkata")
+  userId        Int
+  availability  Availability[]
+  dateOverrides DateOverride[]
+  eventTypes    EventType[]
+  user          User           @relation(fields: [userId], references: [id])
+}
+
+model Availability {
+  id         Int      @id @default(autoincrement())
+  dayOfWeek  Int
+  startTime  String
+  endTime    String
+  scheduleId Int
+  schedule   Schedule @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
+}
+
+model DateOverride {
+  id         Int      @id @default(autoincrement())
+  date       DateTime
+  startTime  String?
+  endTime    String?
+  userId     Int
+  scheduleId Int
+  schedule   Schedule @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [id])
+}
+
+model EventType {
+  id          Int       @id @default(autoincrement())
+  title       String
+  description String?
+  slug        String    @unique
+  duration    Int
+  userId      Int
+  bufferTime  Int       @default(0)
+  questions   Json?
+  scheduleId  Int?
+  bookings    Booking[]
+  schedule    Schedule? @relation(fields: [scheduleId], references: [id])
+  user        User      @relation(fields: [userId], references: [id])
+}
+
+model Booking {
+  id          Int       @id @default(autoincrement())
+  eventTypeId Int
+  name        String
+  email       String
+  date        DateTime
+  startTime   String
+  endTime     String
+  answers     Json?
+  notes       String?
+  status      String    @default("confirmed")
+  eventType   EventType @relation(fields: [eventTypeId], references: [id], onDelete: Cascade)
+}
