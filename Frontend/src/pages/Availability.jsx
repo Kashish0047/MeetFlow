@@ -114,15 +114,36 @@ const Availability = () => {
         }
     };
 
-    const handleDeleteOverride = async (id) => {
-        if (!window.confirm("Delete this override?")) return;
-        try {
-            await axios.delete(`${API_BASE}/overrides/${id}`);
-            toast.success("Override deleted");
-            fetchOverrides();
-        } catch (err) {
-            toast.error("Error deleting override");
-        }
+    const handleDeleteOverride = (id) => {
+        toast(
+            <div className="flex flex-col gap-3">
+                <p className="font-semibold text-gray-900">Delete this override?</p>
+                <div className="flex gap-2 justify-end mt-2">
+                    <button 
+                        onClick={() => toast.dismiss()} 
+                        className="px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-100 rounded-lg transition-colors border border-gray-200"
+                    >
+                        Cancel
+                    </button>
+                    <button 
+                        onClick={async () => {
+                            toast.dismiss();
+                            try {
+                                await axios.delete(`${API_BASE}/overrides/${id}`);
+                                toast.success("Override deleted");
+                                fetchOverrides();
+                            } catch (err) {
+                                toast.error("Error deleting override");
+                            }
+                        }}
+                        className="px-3 py-1.5 text-xs font-medium bg-black text-white hover:bg-gray-800 rounded-lg transition-colors"
+                    >
+                        Confirm
+                    </button>
+                </div>
+            </div>,
+            { autoClose: false, closeOnClick: false, closeButton: false }
+        );
     };
 
     if (loading) return <div className="p-20 text-center font-bold text-gray-400 animate-pulse uppercase tracking-widest">Loading Availability...</div>;
