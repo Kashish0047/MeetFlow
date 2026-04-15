@@ -199,10 +199,6 @@ const BookingPage = () => {
                 </div>
             )}
           </div>
-
-          <div className="mt-20 pt-10 border-t border-gray-100">
-              <p className="text-[10px] font-bold text-gray-300 uppercase tracking-tighter italic">"A Cal.com Clone for SDE Intern Assignment"</p>
-          </div>
         </div>
 
         <div className="flex-1 p-10 lg:p-14 overflow-hidden">
