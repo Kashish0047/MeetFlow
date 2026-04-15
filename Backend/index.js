@@ -417,7 +417,8 @@ app.post('/bookings/:id/reschedule', async (req, res) => {
                 startTime,
                 endTime,
                 notes: 'Rescheduled'
-            }
+            },
+            include: { eventType: true }
         });
 
         const rescheduleHtml = `
