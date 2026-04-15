@@ -391,8 +391,7 @@ app.post('/book', async (req, res) => {
             </p>
         </div>
     `;
-
-    await sendEmail(email, `Confirmed: ${booking.eventType.title} with MeetFlow`, emailHtml);
+    sendEmail(email, `Confirmed: ${booking.eventType.title} with MeetFlow`, emailHtml).catch(console.error);
 
     res.json(booking);
   } catch (error) {
@@ -433,8 +432,7 @@ app.post('/bookings/:id/reschedule', async (req, res) => {
                 </div>
             </div>
         `;
-
-        await sendEmail(updated.email, `Rescheduled: ${updated.eventType?.title || 'Meeting'}`, rescheduleHtml);
+        sendEmail(updated.email, `Rescheduled: ${updated.eventType?.title || 'Meeting'}`, rescheduleHtml).catch(console.error);
 
         res.json(updated);
     } catch (error) {
